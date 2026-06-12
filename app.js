@@ -7,6 +7,8 @@ const phaseHint = document.querySelector("#phaseHint");
 const cycleLabel = document.querySelector("#cycleLabel");
 const nextLabel = document.querySelector("#nextLabel");
 const breathVisual = document.querySelector("#breathVisual");
+const pieFull = document.querySelector("#pieFull");
+const pieSlice = document.querySelector("#pieSlice");
 
 const state = {
   running: false,
@@ -37,9 +39,39 @@ function getDurations() {
   };
 }
 
+function pointOnCircle(ratio) {
+  const angle = -Math.PI / 2 + ratio * Math.PI * 2;
+  return {
+    x: 50 + 48 * Math.cos(angle),
+    y: 50 + 48 * Math.sin(angle),
+  };
+}
+
+function slicePath(remainingRatio) {
+  const ratio = clamp(remainingRatio, 0, 1);
+
+  if (ratio <= 0) {
+    return "";
+  }
+
+  const start = pointOnCircle(0);
+  const end = pointOnCircle(ratio);
+  const largeArc = ratio > 0.5 ? 1 : 0;
+
+  return [
+    "M 50 50",
+    `L ${start.x} ${start.y}`,
+    `A 48 48 0 ${largeArc} 1 ${end.x} ${end.y}`,
+    "Z",
+  ].join(" ");
+}
+
 function setPie(phase, remainingRatio) {
+  const ratio = clamp(remainingRatio, 0, 1);
+
   breathVisual.dataset.phase = phase;
-  breathVisual.style.setProperty("--remaining", `${clamp(remainingRatio, 0, 1) * 100}%`);
+  pieFull.style.opacity = ratio >= 0.999 ? "1" : "0";
+  pieSlice.setAttribute("d", ratio >= 0.999 ? "" : slicePath(ratio));
 }
 
 function updateDurationLabels() {
