@@ -4,7 +4,6 @@ const toggleButton = document.querySelector("#toggleButton");
 const resetButton = document.querySelector("#resetButton");
 const phaseTitle = document.querySelector("#phaseTitle");
 const phaseHint = document.querySelector("#phaseHint");
-const secondsLeft = document.querySelector("#secondsLeft");
 const cycleLabel = document.querySelector("#cycleLabel");
 const nextLabel = document.querySelector("#nextLabel");
 const breathVisual = document.querySelector("#breathVisual");
@@ -31,10 +30,6 @@ function readDuration(input) {
   return clamp(Number.isFinite(value) ? value : fallback, min, max);
 }
 
-function formatSeconds(value) {
-  return value.toFixed(1);
-}
-
 function getDurations() {
   return {
     inhale: readDuration(inhaleInput),
@@ -52,10 +47,6 @@ function updateDurationLabels() {
   inhaleInput.value = durations.inhale;
   exhaleInput.value = durations.exhale;
   nextLabel.textContent = `Inhala ${durations.inhale}s / Exhala ${durations.exhale}s`;
-
-  if (state.phase === "idle") {
-    secondsLeft.textContent = formatSeconds(durations.inhale);
-  }
 }
 
 function setPhase(phase, duration, remaining = duration) {
@@ -68,7 +59,6 @@ function setPhase(phase, duration, remaining = duration) {
   phaseTitle.textContent = isInhale ? "Inhala" : "Exhala";
   phaseHint.textContent = isInhale ? "Toma aire de forma suave." : "Suelta el aire lentamente.";
   setPie(phase, remaining / duration);
-  secondsLeft.textContent = formatSeconds(remaining);
   cycleLabel.textContent = `Ciclo ${state.cycle}`;
 }
 
@@ -91,7 +81,6 @@ function render(now) {
   const remainingRatio = state.phaseDuration > 0 ? remaining / state.phaseDuration : 0;
 
   setPie(state.phase, remainingRatio);
-  secondsLeft.textContent = formatSeconds(remaining);
 
   if (remaining <= 0) {
     if (state.phase === "inhale") {
