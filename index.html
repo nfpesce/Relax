@@ -6,10 +6,27 @@
     <meta name="theme-color" content="#101820">
     <title>Respirar</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="styles.css?v=3">
+    <link rel="stylesheet" href="styles.css?v=4">
   </head>
   <body>
     <main class="app-shell" aria-live="polite">
+      <section class="measure-panel" aria-label="Medir ritmo natural">
+        <div class="measure-copy">
+          <span>Medir mi ritmo</span>
+          <p id="measureStatus">Toca Inhalar al comenzar a tomar aire y Exhalar al comenzar a soltarlo.</p>
+        </div>
+
+        <div class="measure-buttons">
+          <button class="measure-action measure-inhale" id="measureInhaleButton" type="button">Inhalar</button>
+          <button class="measure-action measure-exhale" id="measureExhaleButton" type="button">Exhalar</button>
+        </div>
+
+        <div class="measure-footer">
+          <span id="measureSummary">Sin mediciones todavia.</span>
+          <button class="measure-apply" id="applyMeasuredButton" type="button" disabled>Usar ritmo</button>
+        </div>
+      </section>
+
       <section class="timer-panel">
         <div class="phase-copy">
           <p class="eyebrow">Ritmo de respiracion</p>
@@ -59,6 +76,6 @@
       </section>
     </main>
 
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=4"></script>
   </body>
 </html>

@@ -2,6 +2,11 @@ const inhaleInput = document.querySelector("#inhaleSeconds");
 const exhaleInput = document.querySelector("#exhaleSeconds");
 const toggleButton = document.querySelector("#toggleButton");
 const resetButton = document.querySelector("#resetButton");
+const measureInhaleButton = document.querySelector("#measureInhaleButton");
+const measureExhaleButton = document.querySelector("#measureExhaleButton");
+const measureStatus = document.querySelector("#measureStatus");
+const measureSummary = document.querySelector("#measureSummary");
+const applyMeasuredButton = document.querySelector("#applyMeasuredButton");
 const phaseTitle = document.querySelector("#phaseTitle");
 const phaseHint = document.querySelector("#phaseHint");
 const cycleLabel = document.querySelector("#cycleLabel");
@@ -20,8 +25,23 @@ const state = {
   animationId: null,
 };
 
+const measuredRhythm = {
+  lastPhase: null,
+  lastStartedAt: 0,
+  inhaleSamples: [],
+  exhaleSamples: [],
+};
+
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
+}
+
+function roundToStep(value, step) {
+  return Math.round(value / step) * step;
+}
+
+function formatDuration(value) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
 
 function readDuration(input) {
@@ -36,6 +56,21 @@ function getDurations() {
   return {
     inhale: readDuration(inhaleInput),
     exhale: readDuration(exhaleInput),
+  };
+}
+
+function average(values) {
+  if (values.length === 0) {
+    return 0;
+  }
+
+  return values.reduce((total, value) => total + value, 0) / values.length;
+}
+
+function getMeasuredDurations() {
+  return {
+    inhale: average(measuredRhythm.inhaleSamples),
+    exhale: average(measuredRhythm.exhaleSamples),
   };
 }
 
@@ -78,7 +113,62 @@ function updateDurationLabels() {
   const durations = getDurations();
   inhaleInput.value = durations.inhale;
   exhaleInput.value = durations.exhale;
-  nextLabel.textContent = `Inhala ${durations.inhale}s / Exhala ${durations.exhale}s`;
+  nextLabel.textContent = `Inhala ${formatDuration(durations.inhale)}s / Exhala ${formatDuration(durations.exhale)}s`;
+}
+
+function updateMeasurePanel() {
+  const measured = getMeasuredDurations();
+  const hasInhale = measuredRhythm.inhaleSamples.length > 0;
+  const hasExhale = measuredRhythm.exhaleSamples.length > 0;
+
+  applyMeasuredButton.disabled = !(hasInhale && hasExhale);
+
+  if (!hasInhale && !hasExhale) {
+    measureSummary.textContent = "Sin mediciones todavia.";
+    return;
+  }
+
+  const inhaleText = hasInhale ? `${formatDuration(roundToStep(measured.inhale, 0.1))}s` : "--";
+  const exhaleText = hasExhale ? `${formatDuration(roundToStep(measured.exhale, 0.1))}s` : "--";
+  measureSummary.textContent = `Promedio: inhalar ${inhaleText} / exhalar ${exhaleText}`;
+}
+
+function recordBreathStart(phase) {
+  const now = performance.now();
+  const previousPhase = measuredRhythm.lastPhase;
+
+  if (previousPhase && previousPhase !== phase) {
+    const elapsed = (now - measuredRhythm.lastStartedAt) / 1000;
+
+    if (previousPhase === "inhale") {
+      measuredRhythm.inhaleSamples.push(elapsed);
+    } else {
+      measuredRhythm.exhaleSamples.push(elapsed);
+    }
+  }
+
+  measuredRhythm.lastPhase = phase;
+  measuredRhythm.lastStartedAt = now;
+
+  const isInhale = phase === "inhale";
+  measureStatus.textContent = isInhale
+    ? "Inhalacion marcada. Toca Exhalar cuando empieces a soltar el aire."
+    : "Exhalacion marcada. Toca Inhalar cuando empieces a tomar aire.";
+
+  updateMeasurePanel();
+}
+
+function applyMeasuredRhythm() {
+  const measured = getMeasuredDurations();
+  const inhale = clamp(roundToStep(measured.inhale, Number(inhaleInput.step)), Number(inhaleInput.min), Number(inhaleInput.max));
+  const exhale = clamp(roundToStep(measured.exhale, Number(exhaleInput.step)), Number(exhaleInput.min), Number(exhaleInput.max));
+
+  inhaleInput.value = formatDuration(inhale);
+  exhaleInput.value = formatDuration(exhale);
+  updateDurationLabels();
+
+  phaseHint.textContent = "Ritmo medido aplicado. Presiona iniciar cuando quieras.";
+  measureStatus.textContent = "Ritmo aplicado a los segundos de inhalar y exhalar.";
 }
 
 function setPhase(phase, duration, remaining = duration) {
@@ -191,6 +281,10 @@ toggleButton.addEventListener("click", () => {
 });
 
 resetButton.addEventListener("click", reset);
+measureInhaleButton.addEventListener("click", () => recordBreathStart("inhale"));
+measureExhaleButton.addEventListener("click", () => recordBreathStart("exhale"));
+applyMeasuredButton.addEventListener("click", applyMeasuredRhythm);
 
 updateDurationLabels();
+updateMeasurePanel();
 setPie("idle", 0);

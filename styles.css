@@ -49,6 +49,7 @@ button {
   gap: 14px;
 }
 
+.measure-panel,
 .timer-panel,
 .controls-panel {
   background: rgba(255, 255, 255, 0.92);
@@ -57,8 +58,85 @@ button {
   box-shadow: var(--shadow);
 }
 
+.measure-panel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.measure-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.measure-copy span {
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+.measure-copy p,
+.measure-footer span {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.measure-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.measure-action {
+  min-height: 64px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 1.12rem;
+  font-weight: 900;
+}
+
+.measure-inhale {
+  background: var(--inhale);
+}
+
+.measure-exhale {
+  background: var(--exhale);
+}
+
+.measure-action:active {
+  transform: translateY(1px);
+  filter: brightness(0.94);
+}
+
+.measure-footer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.measure-apply {
+  min-height: 38px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 14px;
+  background: #17202a;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.measure-apply:disabled {
+  background: #d7dcd7;
+  color: #7b8580;
+}
+
 .timer-panel {
-  min-height: calc(100dvh - 218px);
+  min-height: clamp(300px, calc(100dvh - 380px), 520px);
   display: grid;
   grid-template-rows: auto 1fr auto;
   align-items: center;
@@ -243,6 +321,10 @@ button:focus-visible {
   }
 
   .duration-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .measure-footer {
     grid-template-columns: 1fr;
   }
 }
